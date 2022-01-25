@@ -6,62 +6,76 @@
         dark
     >
       <div class="d-flex align-center">
-        <v-img
-            alt="Vuetify Logo"
-            class="shrink mr-2"
-            contain
-            src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-            transition="scale-transition"
-            width="40"
-        />
-
-        <v-img
-            alt="Vuetify Name"
-            class="shrink mt-1 hidden-sm-and-down"
-            contain
-            min-width="100"
-            src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-            width="100"
-        />
+        <!-- TODO Insert Logo -->
       </div>
 
       <v-spacer></v-spacer>
 
       <v-btn
-          href="https://github.com/vuetifyjs/vuetify/releases/latest"
+          href="https://github.com/Bun133/PaperHub"
           target="_blank"
           text
       >
-        <span class="mr-2">Latest Release</span>
+        <span class="mr-2">Open Github</span>
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
     </v-app-bar>
 
     <v-main>
-      <HelloWorld/>
+      <div id="upper_bar" class="d-flex justify-end">
+        <v-btn color="secondary" class="ma-2" to="/import">
+          <v-icon class="mr-1">mdi-import</v-icon>
+          Import
+        </v-btn>
+        <v-btn color="secondary" class="ma-2" to="/download">
+          <v-icon class="mr-1">mdi-download</v-icon>
+          Download
+        </v-btn>
+      </div>
+
+      <div class="px-4">
+        <PaperList :papers="this.config.papers"/>
+      </div>
+
     </v-main>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
+
+import PaperList from "@/components/PaperList";
 
 export default {
   name: 'App',
-
-  components: {
-    HelloWorld,
-  },
+  components: {PaperList},
 
   data: () => ({
     //
+    config: {},
+    isConfigLoaded: false,
   }),
 
   mounted() {
-    console.log("App mounted");
-    window.ipcRenderer.send("toMain","hello");
-    window.ipcRenderer.receive("fromMain",(event,data)=>{
-      console.log(data);
+    window.ipcRenderer.send("toMain@saveConfig", {
+      papers: [{
+        title: "Paper 1.16.5",
+        minecraft_version: "1.16.5",
+        paper_version: "201",
+        executePath: ""
+      }],
+    });
+
+    window.ipcRenderer.send("toMain@loadConfig");
+    window.ipcRenderer.receive("fromMain@loadConfig-reply", (event, data) => {
+      if (data !== undefined) {
+        console.log("load data:", data);
+        this.isConfigLoaded = true;
+        this.config = data;
+      } else {
+        console.log("Config is empty");
+        this.isConfigLoaded = false;
+        this.config = {};
+      }
     });
   },
 };

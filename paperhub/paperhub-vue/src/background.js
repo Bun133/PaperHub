@@ -1,6 +1,6 @@
 'use strict'
 
-import {app, protocol, BrowserWindow, ipcMain} from 'electron'
+import {app, protocol, BrowserWindow, ipcMain, shell} from 'electron'
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, {VUEJS_DEVTOOLS} from 'electron-devtools-installer'
 
@@ -36,6 +36,17 @@ async function createWindow() {
         // Load the index.html when not in development
         win.loadURL('app://./index.html')
     }
+
+
+    // デフォルトブラウザで開くように
+    win.webContents.on('new-window', (event, url) => {
+        // event.preventDefault();
+        shell.openExternal(url);
+    })
+
+    // Pass ipcMain to BackEnd
+    const backEnd = require("./backEnd.js")
+    backEnd.main(ipcMain, app.getPath("userData"),win)
 }
 
 // Quit when all windows are closed.
@@ -82,7 +93,3 @@ if (isDevelopment) {
         })
     }
 }
-
-// Pass ipcMain to BackEnd
-const backEnd = require("./backEnd.js")
-backEnd.main(ipcMain)

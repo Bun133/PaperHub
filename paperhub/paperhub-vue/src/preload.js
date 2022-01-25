@@ -5,14 +5,12 @@ import {contextBridge, ipcRenderer} from 'electron'
 contextBridge.exposeInMainWorld('ipcRenderer', {
     send: (channel, data) => {
         // whitelist channels
-        let validChannels = ['toMain']
-        if (validChannels.includes(channel)) {
+        if (channel.startsWith('toMain')) {
             ipcRenderer.send(channel, data)
         }
     },
     receive: (channel, func) => {
-        let validChannels = ['fromMain']
-        if (validChannels.includes(channel)) {
+        if (channel.startsWith('fromMain')) {
             // Deliberately strip event as it includes `sender`
             ipcRenderer.on(channel, (event, ...args) => func(event, ...args))
         }
