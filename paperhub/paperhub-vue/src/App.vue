@@ -1,25 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar
-        app
-        color="primary"
-        dark
-    >
-      <div class="d-flex align-center">
-        <!-- TODO Insert Logo -->
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-          href="https://github.com/Bun133/PaperHub"
-          target="_blank"
-          text
-      >
-        <span class="mr-2">Open Github</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
-    </v-app-bar>
+    <HangBar/>
 
     <v-main>
       <div id="upper_bar" class="d-flex justify-end">
@@ -44,10 +25,11 @@
 <script>
 
 import PaperList from "@/components/PaperList";
+import HangBar from "@/components/HangBar";
 
 export default {
   name: 'App',
-  components: {PaperList},
+  components: {HangBar, PaperList},
 
   data: () => ({
     //
