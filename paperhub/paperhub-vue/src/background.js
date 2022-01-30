@@ -1,6 +1,6 @@
 'use strict'
 
-import {app, protocol, BrowserWindow, ipcMain, shell} from 'electron'
+import {app, protocol, BrowserWindow, ipcMain, shell, dialog} from 'electron'
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, {VUEJS_DEVTOOLS} from 'electron-devtools-installer'
 
@@ -46,7 +46,7 @@ async function createWindow() {
 
     // Pass ipcMain to BackEnd
     const backEnd = require("./backEnd.js")
-    backEnd.main(ipcMain, app.getPath("userData"),win)
+    backEnd.main(ipcMain, app.getPath("userData"), win,dialog)
 }
 
 // Quit when all windows are closed.

@@ -1,19 +1,167 @@
 <template>
-  <div>
+  <v-app>
     <HangBar/>
     <v-main>
-      <h1>Download Server File</h1>
-      <h2>Output Directory:<v-file-input webkitdirectory></v-file-input></h2>
+      <v-container>
+        <div id="upper_bar" class="d-flex justify-start">
+          <v-btn color="secondary" class="ma-2" to="/">
+            <v-icon class="mr-1">mdi-home</v-icon>
+            Home
+          </v-btn>
+        </div>
+
+        <h1>Download Server File</h1>
+        <h2>Output Directory:{{ folder }}
+          <folder-input v-model="folder">
+            <template v-slot:icon>
+              <v-icon>mdi-folder-outline</v-icon>
+            </template>
+          </folder-input>
+        </h2>
+        <v-autocomplete :items="versions"
+                        :loading="isVersionLoading"
+                        item-text="id"
+                        label="Minecraft Version"
+                        v-model="selectedVersion"
+                        @change="getPaperDownloadDetails(selectedVersion)"
+        >
+          <template v-slot:no-data>
+            <v-list-item>
+              <v-list-item-title>
+                No Minecraft Version Found
+              </v-list-item-title>
+            </v-list-item>
+          </template>
+        </v-autocomplete>
+        <v-autocomplete :items="paperVersionsRevered"
+                        :loading="isPaperVersionLoading"
+                        label="Paper Version"
+                        v-model="selectedPaperVersion"
+        >
+          <template v-slot:no-data>
+            <v-list-item>
+              <v-list-item-title>
+                No Paper Version Found on Minecraft Version: {{ selectedVersion }}
+              </v-list-item-title>
+            </v-list-item>
+          </template>
+        </v-autocomplete>
+
+        <v-btn color="primary" @click="download(getPaperDownloadLink(selectedVersion,selectedPaperVersion),folder)">
+          Download!
+        </v-btn>
+
+        <progress-snack-bar :is-shown="isDownloading"
+                            :is-indeterminate="isDownloadWaiting"
+                            :progress="downloadProgress">
+          <template v-slot:message>
+            <p class="py-1">
+              Downloading Paper Server({{ "paper-" + selectedVersion + "-" + selectedPaperVersion + ".jar" }})
+            </p>
+          </template>
+        </progress-snack-bar>
+      </v-container>
     </v-main>
-  </div>
+  </v-app>
 </template>
 
 <script>
 import HangBar from "@/components/HangBar";
+import FolderInput from "@/components/FolderInput";
+import ProgressSnackBar from "@/components/ProgressSnackBar";
 
 export default {
   name: "download",
-  components: {HangBar}
+  components: {ProgressSnackBar, FolderInput, HangBar},
+  data() {
+    return {
+      // FolderSelect
+      folder: "",
+      // Minecraft Version
+      versions: null,
+      selectedVersion: null,
+      isVersionLoading: false,
+      // Paper Version
+      paperVersions: {},
+      selectedPaperVersion: null,
+      isPaperVersionLoading: false,
+      // Download
+      isDownloading: false,
+      downloadProgress: 0,
+      isDownloadWaiting: false,
+    };
+  },
+  mounted() {
+    this.isVersionLoading = true;
+    fetch("https://launchermeta.mojang.com/mc/game/version_manifest.json")
+        .then(res => res.json())
+        .then(json => {
+          this.versions = json.versions;
+          this.isVersionLoading = false;
+        });
+
+
+    window.ipcRenderer.receive("fromMain@DownloadFile-complete", (event, data) => {
+      console.log("Download complete!:", data);
+      this.isDownloading = false;
+      this.isDownloadWaiting = false;
+    });
+
+    window.ipcRenderer.receive("fromMain@DownloadFile-progress", (event, data) => {
+      console.log("Download progress:", data * 100, "%");
+      this.isDownloadWaiting = false;
+      this.downloadProgress = data * 100;
+    });
+  },
+  methods: {
+    getPaperDownloadDetails(versionString) {
+      if (!versionString) {
+        this.paperVersions = [];
+        return;
+      }
+      this.isPaperVersionLoading = true;
+      fetch("https://papermc.io/api/v2/projects/paper/versions/" + versionString)
+          .then(res => res.json())
+          .then(json => {
+            this.paperVersions = json;
+            this.isPaperVersionLoading = false;
+          })
+          .catch(err => {
+            // This can be caused by the version not supported by paper.
+            // In this case, we will just return an empty object.
+            console.log(err)
+            this.isPaperVersionLoading = false;
+            this.paperVersions = [];
+          });
+    },
+    getPaperDownloadLink(versionString, buildString) {
+      if (!versionString || !buildString) {
+        return null;
+      }
+      return "https://papermc.io/api/v2/projects/paper/versions/" + versionString + "/builds/" + buildString + "/downloads/paper-" + versionString + "-" + buildString + ".jar";
+    },
+    download(downloadPath, folderPath) {
+      if (this.isDownloading) {
+        console.log("Already downloading!");
+        return
+      }
+      console.log("Downloading:", downloadPath, " into ", folderPath)
+      this.isDownloading = true;
+      this.isDownloadWaiting = true;
+      window.ipcRenderer.send("toMain@DownloadFile", {
+        url: downloadPath,
+        directory: folderPath
+      });
+    }
+  },
+  computed: {
+    paperVersionsRevered() {
+      if (!this.paperVersions || !this.paperVersions['builds']) {
+        return [];
+      }
+      return this.paperVersions['builds'].slice().reverse()
+    }
+  }
 }
 </script>
 

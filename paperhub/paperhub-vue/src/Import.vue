@@ -1,12 +1,14 @@
 <template>
-  <div>
+  <v-app>
     <HangBar/>
     <v-main>
-      <h1>Import Server</h1>
-      <v-file-input webkitdirectory v-model="folder"></v-file-input>
-      {{ folder }}
+      <v-container>
+        <h1>Import Server</h1>
+        <v-file-input webkitdirectory v-model="folder"></v-file-input>
+        {{ folder }}
+      </v-container>
     </v-main>
-  </div>
+  </v-app>
 </template>
 
 <script>

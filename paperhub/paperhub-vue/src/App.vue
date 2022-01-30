@@ -3,20 +3,19 @@
     <HangBar/>
 
     <v-main>
-      <div id="upper_bar" class="d-flex justify-end">
-        <v-btn color="secondary" class="ma-2" to="/import">
-          <v-icon class="mr-1">mdi-import</v-icon>
-          Import
-        </v-btn>
-        <v-btn color="secondary" class="ma-2" to="/download">
-          <v-icon class="mr-1">mdi-download</v-icon>
-          Download
-        </v-btn>
-      </div>
-
-      <div class="px-4">
+      <v-container>
+        <div id="upper_bar" class="d-flex justify-end">
+          <v-btn color="secondary" class="ma-2" to="/import">
+            <v-icon class="mr-1">mdi-import</v-icon>
+            Import
+          </v-btn>
+          <v-btn color="secondary" class="ma-2" to="/download">
+            <v-icon class="mr-1">mdi-download</v-icon>
+            Download
+          </v-btn>
+        </div>
         <PaperList :papers="this.config.papers"/>
-      </div>
+      </v-container>
 
     </v-main>
   </v-app>

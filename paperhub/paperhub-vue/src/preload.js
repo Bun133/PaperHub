@@ -14,5 +14,10 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
             // Deliberately strip event as it includes `sender`
             ipcRenderer.on(channel, (event, ...args) => func(event, ...args))
         }
+    },
+    once: (channel, func) => {
+        if (channel.startsWith('fromMain')) {
+            ipcRenderer.once(channel, (event, ...args) => func(event, ...args))
+        }
     }
 })
