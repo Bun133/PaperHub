@@ -14,9 +14,13 @@
             Download
           </v-btn>
         </div>
-        <PaperList :papers="this.config.papers"/>
+        <div v-if="isConfigLoaded">
+          <PaperList :papers="this.config"/>
+        </div>
+        <div v-else class="d-flex justify-center align-center mt-5">
+          <v-progress-circular indeterminate color="primary" size="150" class="mb-5" width="6"/>
+        </div>
       </v-container>
-
     </v-main>
   </v-app>
 </template>
@@ -36,28 +40,37 @@ export default {
     isConfigLoaded: false,
   }),
 
-  mounted() {
-    window.ipcRenderer.send("toMain@saveConfig", {
-      papers: [{
-        title: "Paper 1.16.5",
-        minecraft_version: "1.16.5",
-        paper_version: "201",
-        executePath: ""
-      }],
-    });
+  methods: {
+    loadConfig() {
+      console.log("loadConfig");
+      this.isConfigLoaded = false;
+      window.ipcRenderer.send("toMain@loadConfig");
+      window.ipcRenderer.once("fromMain@loadConfig-reply", (event, data) => {
+        if (data !== undefined) {
+          console.log("load data:", data);
+          this.isConfigLoaded = true;
+          this.config = data;
+        } else {
+          console.log("Config is empty");
+          this.isConfigLoaded = false;
+          this.config = {};
+        }
+      });
+    }
+  },
 
-    window.ipcRenderer.send("toMain@loadConfig");
-    window.ipcRenderer.receive("fromMain@loadConfig-reply", (event, data) => {
-      if (data !== undefined) {
-        console.log("load data:", data);
-        this.isConfigLoaded = true;
-        this.config = data;
-      } else {
-        console.log("Config is empty");
-        this.isConfigLoaded = false;
-        this.config = {};
-      }
-    });
+  mounted() {
+    // window.ipcRenderer.send("toMain@ImportServer", {
+    //       title: "Paper 1.18.2",
+    //       folderPath: "",
+    //       executablePath: "",
+    //       minecraftVersion: "1.18.2",
+    //       paperVersion: "75",
+    //       executeArguments: ""
+    //     }
+    // );
+
+    this.loadConfig()
   },
 };
 </script>

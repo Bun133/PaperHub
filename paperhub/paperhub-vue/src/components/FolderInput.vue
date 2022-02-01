@@ -4,7 +4,7 @@
       <slot name="icon"></slot>
     </div>
     <div class="flex-grow-1">
-      <v-text-field label="Folder Select" @click.native="onFocus" v-model="folder">
+      <v-text-field :label="label" @click.native="onFocus" v-model="folder">
       </v-text-field>
     </div>
   </div>
@@ -15,6 +15,12 @@ export default {
   model: {
     prop: 'folder',
     event: 'input'
+  },
+  props:{
+    label:{
+      type:String,
+      default: 'Folder Select'
+    }
   },
   name: "FolderInput",
   data() {

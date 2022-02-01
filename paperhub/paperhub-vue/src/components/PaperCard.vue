@@ -5,8 +5,8 @@
     </v-card-title>
 
     <v-card-text>
-      Minecraft Version: {{ this.$props.entry['minecraft_version'] }}
-      Paper Version: {{ this.$props.entry['paper_version'] }}
+      Minecraft Version: {{ this.$props.entry['minecraftVersion'] }}<br/>
+      Paper Version: {{ this.$props.entry['paperVersion'] }}
     </v-card-text>
 
     <v-card-actions>

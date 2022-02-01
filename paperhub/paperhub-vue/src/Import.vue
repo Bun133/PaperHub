@@ -4,7 +4,7 @@
     <v-main>
       <v-container>
         <h1>Import Server</h1>
-        <v-file-input webkitdirectory v-model="folder"></v-file-input>
+        <folder-input v-model="folder"></folder-input>
         {{ folder }}
       </v-container>
     </v-main>
@@ -13,10 +13,11 @@
 
 <script>
 import HangBar from "@/components/HangBar";
+import FolderInput from "@/components/FolderInput";
 
 export default {
   name: "import",
-  components: {HangBar},
+  components: {FolderInput, HangBar},
   data() {
     return {
       folder: ""

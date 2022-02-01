@@ -11,13 +11,12 @@
         </div>
 
         <h1>Download Server File</h1>
-        <h2>Output Directory:{{ folder }}
-          <folder-input v-model="folder">
-            <template v-slot:icon>
-              <v-icon>mdi-folder-outline</v-icon>
-            </template>
-          </folder-input>
-        </h2>
+        <h2>Output Directory</h2>
+        <folder-input v-model="folder" label="Download Location" required>
+          <template v-slot:icon>
+            <v-icon>mdi-folder-outline</v-icon>
+          </template>
+        </folder-input>
         <v-autocomplete :items="versions"
                         :loading="isVersionLoading"
                         item-text="id"
@@ -47,7 +46,10 @@
           </template>
         </v-autocomplete>
 
-        <v-btn color="primary" @click="download(getPaperDownloadLink(selectedVersion,selectedPaperVersion),folder)">
+        <v-btn color="primary"
+               @click="download(getPaperDownloadLink(selectedVersion,selectedPaperVersion),folder)"
+               :disabled="!valid"
+        >
           Download!
         </v-btn>
 
@@ -89,9 +91,11 @@ export default {
       isDownloading: false,
       downloadProgress: 0,
       isDownloadWaiting: false,
+      //V-Form
+      valid: false,
     };
   },
-  mounted() {
+  created() {
     this.isVersionLoading = true;
     fetch("https://launchermeta.mojang.com/mc/game/version_manifest.json")
         .then(res => res.json())

@@ -2,7 +2,7 @@
   <div id="all">
     <div v-if="this.$props.papers !== undefined">
       <div v-for="(entry,index) in this.$props.papers" :key="index">
-        <PaperCard :entry="entry"></PaperCard>
+        <PaperCard :entry="entry" class="my-2"></PaperCard>
       </div>
     </div>
     <div v-else>
