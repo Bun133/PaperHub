@@ -19,7 +19,7 @@ export function main(ipcMain, userDataDir, window, dialog) {
         fs.writeFileSync(path.join(userDataDir, configFileName), JSON.stringify(arg), 'utf8');
     });
 
-    ipcMain.on("toMain@ImportServer", async (event, arg) => {
+    ipcMain.on("toMain@AddServer", async (event, arg) => {
         const setting = {
             title: arg['title'],
             folderPath: arg['folderPath'],

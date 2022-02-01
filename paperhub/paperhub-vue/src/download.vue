@@ -17,38 +17,15 @@
             <v-icon>mdi-folder-outline</v-icon>
           </template>
         </folder-input>
-        <v-autocomplete :items="versions"
-                        :loading="isVersionLoading"
-                        item-text="id"
-                        label="Minecraft Version"
-                        v-model="selectedVersion"
-                        @change="getPaperDownloadDetails(selectedVersion)"
-        >
-          <template v-slot:no-data>
-            <v-list-item>
-              <v-list-item-title>
-                No Minecraft Version Found
-              </v-list-item-title>
-            </v-list-item>
-          </template>
-        </v-autocomplete>
-        <v-autocomplete :items="paperVersionsRevered"
-                        :loading="isPaperVersionLoading"
-                        label="Paper Version"
-                        v-model="selectedPaperVersion"
-        >
-          <template v-slot:no-data>
-            <v-list-item>
-              <v-list-item-title>
-                No Paper Version Found on Minecraft Version: {{ selectedVersion }}
-              </v-list-item-title>
-            </v-list-item>
-          </template>
-        </v-autocomplete>
+        <MinecraftVersionSelector v-model="selectedVersion">
+        </MinecraftVersionSelector>
+        <PaperVersionSelector v-model="selectedPaperVersion"
+                              :minecraft-version="selectedVersion">
+        </PaperVersionSelector>
 
         <v-btn color="primary"
                @click="download(getPaperDownloadLink(selectedVersion,selectedPaperVersion),folder)"
-               :disabled="!valid"
+               :disabled="!isAllFieldsValid"
         >
           Download!
         </v-btn>
@@ -71,10 +48,12 @@
 import HangBar from "@/components/HangBar";
 import FolderInput from "@/components/FolderInput";
 import ProgressSnackBar from "@/components/ProgressSnackBar";
+import MinecraftVersionSelector from "@/components/MinecraftVersionSelector";
+import PaperVersionSelector from "@/components/PaperVersionSelector";
 
 export default {
   name: "download",
-  components: {ProgressSnackBar, FolderInput, HangBar},
+  components: {PaperVersionSelector, MinecraftVersionSelector, ProgressSnackBar, FolderInput, HangBar},
   data() {
     return {
       // FolderSelect
@@ -91,20 +70,9 @@ export default {
       isDownloading: false,
       downloadProgress: 0,
       isDownloadWaiting: false,
-      //V-Form
-      valid: false,
     };
   },
   created() {
-    this.isVersionLoading = true;
-    fetch("https://launchermeta.mojang.com/mc/game/version_manifest.json")
-        .then(res => res.json())
-        .then(json => {
-          this.versions = json.versions;
-          this.isVersionLoading = false;
-        });
-
-
     window.ipcRenderer.receive("fromMain@DownloadFile-complete", (event, data) => {
       console.log("Download complete!:", data);
       this.isDownloading = false;
@@ -118,26 +86,6 @@ export default {
     });
   },
   methods: {
-    getPaperDownloadDetails(versionString) {
-      if (!versionString) {
-        this.paperVersions = [];
-        return;
-      }
-      this.isPaperVersionLoading = true;
-      fetch("https://papermc.io/api/v2/projects/paper/versions/" + versionString)
-          .then(res => res.json())
-          .then(json => {
-            this.paperVersions = json;
-            this.isPaperVersionLoading = false;
-          })
-          .catch(err => {
-            // This can be caused by the version not supported by paper.
-            // In this case, we will just return an empty object.
-            console.log(err)
-            this.isPaperVersionLoading = false;
-            this.paperVersions = [];
-          });
-    },
     getPaperDownloadLink(versionString, buildString) {
       if (!versionString || !buildString) {
         return null;
@@ -159,11 +107,17 @@ export default {
     }
   },
   computed: {
-    paperVersionsRevered() {
-      if (!this.paperVersions || !this.paperVersions['builds']) {
-        return [];
-      }
-      return this.paperVersions['builds'].slice().reverse()
+    folderValid() {
+      return this.folder && this.folder.length > 0;
+    },
+    minecraftVersionValid() {
+      return this.selectedVersion && this.selectedVersion.length > 0;
+    },
+    paperVersionValid() {
+      return this.selectedPaperVersion && (this.selectedPaperVersion).toString().length > 0;
+    },
+    isAllFieldsValid() {
+      return this.folderValid && this.minecraftVersionValid && this.paperVersionValid
     }
   }
 }

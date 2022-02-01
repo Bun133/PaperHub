@@ -4,7 +4,7 @@
       <slot name="icon"></slot>
     </div>
     <div class="flex-grow-1">
-      <v-text-field :label="label" @click.native="onFocus" v-model="folder">
+      <v-text-field :label="label" @click.native="onFocus" v-model="folder" readonly>
       </v-text-field>
     </div>
   </div>

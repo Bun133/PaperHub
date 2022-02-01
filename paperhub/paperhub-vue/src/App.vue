@@ -60,7 +60,7 @@ export default {
   },
 
   mounted() {
-    // window.ipcRenderer.send("toMain@ImportServer", {
+    // window.ipcRenderer.send("toMain@AddServer", {
     //       title: "Paper 1.18.2",
     //       folderPath: "",
     //       executablePath: "",
