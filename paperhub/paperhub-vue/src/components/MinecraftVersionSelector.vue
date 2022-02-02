@@ -4,7 +4,7 @@
                     :loading="isVersionLoading"
                     item-text="id"
                     label="Minecraft Version"
-                    v-model="selectedVersion"
+                    v-model="autoCompleteVersion"
                     @change="emitEvent"
     >
       <template v-slot:no-data>
@@ -21,21 +21,28 @@
 <script>
 export default {
   name: "MinecraftVersionSelector",
-  model:{
+  model: {
     prop: "selectedVersion",
     event: "onVersionSelect"
+  },
+  props: {
+    selectedVersion: {
+      type: String,
+      default: ""
+    }
   },
   data() {
     return {
       versions: [],
       isVersionLoading: false,
-      selectedVersion: null,
+      autoCompleteVersion: null
     }
   },
   methods: {
     emitEvent() {
-      if (this.selectedVersion) {
-        this.$emit('onVersionSelect', this.selectedVersion);
+      if (this.autoCompleteVersion) {
+        this.selectedVersion = this.autoCompleteVersion
+        this.$emit('onVersionSelect', this.autoCompleteVersion);
       }
     }
   },
@@ -47,6 +54,11 @@ export default {
           this.versions = json.versions;
           this.isVersionLoading = false;
         });
+  },
+  watch: {
+    selectedVersion(newVersion) {
+      this.autoCompleteVersion = newVersion;
+    }
   }
 }
 </script>

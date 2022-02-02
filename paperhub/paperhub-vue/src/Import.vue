@@ -52,11 +52,19 @@ export default {
       });
     },
     autoCompleteFields() {
+      if (!this.file) {
+        return
+      }
       const name = this.file.name;
       // The File Name is this pattern: "paper-<minecraftVersion>-<paperVersion>.jar"
       // So we can auto complete the Minecraft Version and Paper Version
-      this.minecraftVersion = name.split("-")[1];
-      this.paperVersion = name.split("-")[2].split(".")[0];
+      const inputMinecraftVersion = name.split("-")[1];
+      const inputPaperVersionAll = name.split("-")[2]
+      const inputPaperVersion = inputPaperVersionAll.split(".")[0];
+      if (inputMinecraftVersion && inputPaperVersion) {
+        this.minecraftVersion = inputMinecraftVersion;
+        this.paperVersion = inputPaperVersion.toString();
+      }
       // TODO 表示に反映されない
     }
   },

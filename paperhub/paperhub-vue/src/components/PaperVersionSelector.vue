@@ -3,7 +3,7 @@
     <v-autocomplete :items="paperVersionsRevered"
                     :loading="isPaperVersionLoading"
                     label="Paper Version"
-                    v-model="selectedPaperVersion"
+                    v-model="autoCompletePaperVersion"
                     @change="emitEvent"
     >
       <template v-slot:no-data>
@@ -20,7 +20,7 @@
 <script>
 export default {
   name: "PaperVersionSelector",
-  model:{
+  model: {
     prop: "selectedPaperVersion",
     event: "onVersionSelect"
   },
@@ -28,13 +28,18 @@ export default {
     minecraftVersion: {
       type: String,
       required: true
+    },
+    selectedPaperVersion: {
+      type: String,
+      default: ""
     }
   },
   data() {
     return {
-      selectedPaperVersion: null,
       isPaperVersionLoading: false,
-      paperVersions: []
+      loadedMinecraftVersion: "",
+      paperVersions: [],
+      autoCompletePaperVersion: null
     }
   },
   computed: {
@@ -45,12 +50,21 @@ export default {
       return this.paperVersions['builds'].slice().reverse()
     }
   },
-  watch:{
+  watch: {
     minecraftVersion(newVal) {
       this.getPaperDownloadDetails(newVal);
+    },
+    selectedPaperVersion(newVal) {
+      this.autoCompletePaperVersion = newVal;
     }
   },
-  methods:{
+  methods: {
+    emitEvent() {
+      if (this.autoCompletePaperVersion) {
+        this.selectedPaperVersion = this.autoCompletePaperVersion
+        this.$emit('onVersionSelect', this.autoCompletePaperVersion);
+      }
+    },
     getPaperDownloadDetails(versionString) {
       if (!versionString) {
         this.paperVersions = [];
@@ -62,6 +76,7 @@ export default {
           .then(json => {
             this.paperVersions = json;
             this.isPaperVersionLoading = false;
+            this.loadedMinecraftVersion = versionString;
           })
           .catch(err => {
             // This can be caused by the version not supported by paper.
@@ -70,11 +85,6 @@ export default {
             this.isPaperVersionLoading = false;
             this.paperVersions = [];
           });
-    },
-    emitEvent() {
-      if (this.selectedPaperVersion) {
-        this.$emit('onVersionSelect', this.selectedPaperVersion);
-      }
     }
   }
 }
